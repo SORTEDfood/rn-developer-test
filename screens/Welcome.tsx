@@ -1,35 +1,47 @@
 import * as React from "react";
 import {
-  Alert,
-  Platform,
   StyleSheet,
   FlatList,
   View,
   ListRenderItemInfo,
+  TextInput,
 } from "react-native";
-import * as AuthSession from "expo-auth-session";
-import { JwtPayload } from "jwt-decode";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { SafeAreaView } from "react-native-safe-area-context";
+import "firebase/storage";
+import { initializeApp } from "firebase/app";
+import {
+  getAuth,
+  onAuthStateChanged,
+  EmailAuthProvider,
+  signInWithCredential,
+} from "firebase/auth";
 
 import useOrientation from "../hooks/useOrientation";
 
 import Button from "../components/Button";
 import Paragraph from "../components/Paragraph";
-import TextLink from "../components/TextLink";
 import WelcomeSlide from "../components/WelcomeSlide";
 
-import { spacing } from '../styles';
+import { spacing } from "../styles";
 
 import { RootStackParamList } from "../types";
 
-interface JWT extends JwtPayload {
-  name: string;
-  nickname: string;
-  nonce: string;
-  picture: string;
-  updated_at: string;
-}
+// Setup and initialise Firebase
+const firebaseConfig = {
+  apiKey: "***REMOVED***",
+  authDomain: "sorted-packs.firebaseapp.com",
+  databaseURL: "https://sorted-packs.firebaseio.com",
+  projectId: "sorted-packs",
+  storageBucket: "sorted-packs.appspot.com",
+  messagingSenderId: "130479053229",
+  appId: "1:130479053229:web:36f74c5ef6237b0390a924",
+  measurementId: "G-GQ8VWP74C6",
+};
+
+initializeApp(firebaseConfig);
+
+const auth = getAuth();
 
 // Setup routing props for the screen
 type Props = NativeStackScreenProps<RootStackParamList, "Welcome">;
@@ -74,51 +86,129 @@ const slides: Readonly<ItemSlide[]> = [
   },
 ];
 
-// Configure auth0 constants
-const auth0ClientId = "dRp7w1EHZ9KX2AJ3qhDzCCpP6W9iov7w";
-const authorizationEndpoint = "https://sortedfood.eu.auth0.com/authorize";
+const LoginForm: React.FC<{
+  isLoading: boolean;
+  onSubmit: (email: string, password: string) => Promise<void>;
+}> = ({ isLoading, onSubmit }) => {
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  return (
+    <>
+      <View style={styles.formContainer}>
+        <Paragraph style={styles.textInputLabel}>Email:</Paragraph>
+        <TextInput
+          placeholder="email"
+          value={email}
+          onChangeText={setEmail}
+          style={styles.textInput}
+          textContentType="emailAddress"
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <Paragraph style={styles.textInputLabel}>Password:</Paragraph>
 
-const useProxy = Platform.select({ web: false, default: true });
-const redirectUri = AuthSession.makeRedirectUri({ useProxy: false });
+        <TextInput
+          placeholder="password"
+          value={password}
+          onChangeText={setPassword}
+          style={styles.textInput}
+          textContentType="password"
+          secureTextEntry
+          autoCapitalize="none"
+        />
+      </View>
+      <Button
+        disabled={isLoading}
+        onPress={() => onSubmit(email, password)}
+        style={styles.textInput}
+      >
+        Sign In
+      </Button>
+    </>
+  );
+};
+
+// NOT USED
+const SignupForm: React.FC<{
+  isLoading: boolean;
+  onSubmit: (email: string, password: string, name: string) => Promise<void>;
+}> = ({ isLoading, onSubmit }) => {
+  const [name, setName] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+
+  return (
+    <>
+      <View style={styles.formContainer}>
+        <Paragraph style={styles.textInputLabel}>Name:</Paragraph>
+        <TextInput
+          placeholder="name"
+          value={name}
+          onChangeText={setName}
+          style={styles.textInput}
+        />
+        <Paragraph style={styles.textInputLabel}>Email:</Paragraph>
+        <TextInput
+          placeholder="email"
+          value={email}
+          onChangeText={setEmail}
+          style={styles.textInput}
+          textContentType="emailAddress"
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <Paragraph style={styles.textInputLabel}>Password:</Paragraph>
+        <TextInput
+          placeholder="password"
+          value={password}
+          onChangeText={setPassword}
+          style={styles.textInput}
+          textContentType="password"
+          secureTextEntry
+          autoCapitalize="none"
+        />
+      </View>
+      <Button
+        disabled={isLoading}
+        onPress={() => onSubmit(email, password, name)}
+      >
+        Sign Up
+      </Button>
+    </>
+  );
+};
 
 const WelcomeScreen = ({ navigation }: Props) => {
   const orientation = useOrientation();
 
-  const [request, result, promptAsync] = AuthSession.useAuthRequest(
-    {
-      redirectUri,
-      clientId: auth0ClientId,
-      // id_token will return a JWT token
-      responseType: "id_token",
-      // retrieve the user's profile
-      scopes: ["openid", "profile"],
-      extraParams: {
-        // ideally, this will be a random value
-        nonce: "nonce",
-      },
-    },
-    { authorizationEndpoint }
-  );
+  const [isLoading, setIsLoading] = React.useState(false);
 
-  React.useEffect(() => {
-    if (result) {
-      if (result.type === "error") {
-        Alert.alert(
-          "Authentication error",
-          result.params.error_description || "something went wrong"
-        );
-        return;
-      }
-      if (result.type === "success") {
-        // Retrieve the JWT token
-        const jwtToken = result.params.id_token;
-        // Decode it
-        // .........
-
-        navigation.navigate("Home");
-      }
+  // Listen for authentication state to change.
+  onAuthStateChanged(auth, async (user) => {
+    if (user != null) {
+      console.log("We are authenticated now!");
+      const jwtToken = await user.getIdToken();
+      // Persist session & make accessible for API calls
+      // .......
+      console.log("jwtToken", jwtToken);
     }
-  }, [result]);
+
+    // Do other things
+  });
+
+  async function authenticateWithFirebase(email: string, password: string) {
+    console.log("authenticatedWithFirebase");
+    setIsLoading(true);
+
+    const authCredential = EmailAuthProvider.credential(email, password);
+
+    await signInWithCredential(auth, authCredential).catch((error) => {
+      // Handle Errors here.
+      console.log("error", error);
+    });
+
+    setIsLoading(false);
+  }
 
   const renderSlide = (item: ListRenderItemInfo<ItemSlide>) => {
     return (
@@ -142,15 +232,7 @@ const WelcomeScreen = ({ navigation }: Props) => {
         extraData={orientation}
       />
       <SafeAreaView style={styles.absolute}>
-        <Button disabled={!request} onPress={() => promptAsync({ useProxy })}>
-          Sign Up
-        </Button>
-        <View style={styles.footerTextWrapper}>
-          <Paragraph style={styles.footerText}>
-            Already have an account?
-          </Paragraph>
-          <TextLink disabled={!request} bold onPress={() => promptAsync({ useProxy })}>{" Log in"}</TextLink>
-        </View>
+        <LoginForm onSubmit={authenticateWithFirebase} isLoading={isLoading} />
       </SafeAreaView>
     </View>
   );
@@ -178,9 +260,24 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
+  formContainer: {
+    padding: 10,
+    backgroundColor: "#eeeeee20",
+  },
+  textInput: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#eee",
+    borderRadius: 10,
+    marginVertical: 5,
+    padding: 10,
+    color: "white",
+  },
+  textInputLabel: {
+    color: "white",
+  },
   footerTextWrapper: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     paddingHorizontal: spacing.sd,
     marginBottom: spacing.lg,
   },

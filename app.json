@@ -1,13 +1,12 @@
 {
-    "expo": {
-        "name": "RN Developer Test",
-        "slug": "rn-developer-test",
-        "sdkVersion": "43.0.0",
-        "splash": {
-            "image": "./assets/images/splash.png",
-            "resizeMode": "contain",
-            "backgroundColor": "#ffc022"
-        },
-        "icon": "./assets/images/icon.png"
-    }
+  "expo": {
+    "name": "RN Developer Test",
+    "slug": "rn-developer-test",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffc022"
+    },
+    "icon": "./assets/images/icon.png"
+  }
 }
