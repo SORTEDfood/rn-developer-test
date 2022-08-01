@@ -29,7 +29,7 @@ import { RootStackParamList } from "../types";
 
 // Setup and initialise Firebase
 const firebaseConfig = {
-  apiKey: "***REMOVED***",
+  apiKey: "AIzaSyDxnLqZg5BZJprt8RKU7Iiwx3V5EDzAMaY",
   authDomain: "sorted-packs.firebaseapp.com",
   databaseURL: "https://sorted-packs.firebaseio.com",
   projectId: "sorted-packs",
