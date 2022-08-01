@@ -15,40 +15,60 @@ Be sure to read **all** of this document carefully, and follow the guidelines wi
 ## Task Outline
 Everyone at Sorted is passionate about food - and we're creating tools to help foodies all around the world cook better, and smarter. We give people the tools and know-how, but the rest is up to them.
 
-As part of this, the Mealpacks app loads data from an API which provides data on Recipes, where Recipes are grouped together into Packs. Each week a selection of Packs are curated together into a Menu by our in-house development chefs.
+As part of this, the Sidekick app loads data from an API which provides data on Recipes, where Recipes are grouped together into Recipe Packs. Each week a selection of Recipe Packs are curated together into a Menu by our in-house development chefs.
 
-We would like you to connect the provided Expo app to the Mealpacks REST API. You'll have to retrieve the Menu data, then display the Packs and related Recipes within the UI. We've given you all of the building blocks, but you'll have to fill in the blanks and decide on how to display the data retrieved from the API. Some minor clues have been left in the code which you may find of use.
+We would like you to connect the provided Expo app to the Sidekick REST API. You'll have to retrieve the Menu data, then display the Packs and related Recipes within the UI. We've given you all of the building blocks, but you'll have to fill in the blanks and decide on how to display the data retrieved from the API. Some minor clues have been left in the code which you may find of use.
 
 
 ## Requirements
 To be successful in this task, you'll need to satisfy the following use cases:
 
-**User session is persisted across app launches**
+### User session is persisted across app launches
 
-The app currently allows users to signup & login via auth0, but sessions are not persisted across app launches. If I have previously logged into the app, I should not have to login again on app launch.
+The app currently allows users to signup & login via Firebase, but sessions are not persisted across app launches. If I have previously logged into the app, I should not have to login again on app launch.
 
 > N.B. Do not worry about session duration or expiration
 
-**The current Menu is displayed on the Home screen**
+### The current Menu is displayed on the Home screen
 
-The Home screen should load from the Menu API (https://cook.sorted.club/api/v1/menu) and display a list of Packs, and within each Pack it should display a list of Recipes. Use your judgement on the design of this, but we encourage you to think *visually* and make use of images where appropriate.
+The Home screen should load from the Menu API and display a list of Packs, and within each Pack it should display a list of Recipes. Use your judgement on the design of this, but we encourage you to think *visually* and make use of images where appropriate.
+
+*Menu API:*
 
 > N.B. There is no authentication required for this API
 
-**A dedicated Recipe screen which can be navigated to from the Home screen**
+`GET https://cook.sorted.club/api/v1/menu`
 
-From the Home screen, you should be able to navigate to a new Recipe screen (the Recipes displayed on the Home screen should be clickable). The Recipe screen itself should use data loaded from the Menu API and should be kept visually simple. At a minimum, include the following information on the Recipe screen:
+### A dedicated Pack screen which can be navigated to from the Home screen
+
+From the Home screen, you should be able to navigate to a new Pack screen. The Pack screen itself should use data loaded from the Pack API and should be kept visually simple. At a minimum, include the following information on the Pack screen:
+- Image
+- Title
+- Portion size toggle (refer to the `num_people` property)
+
+*Pack API:*
+
+> N.B. Authentication is required for this API
+
+`GET https://cook.sorted.club/api/v1/pack/{packId} Authorization: Bearer {JWT}`
+
+### A dedicated Recipe screen which can be navigated to from the Pack screen
+
+From the Pack screen, you should be able to navigate to a new Recipe screen (the Recipes displayed on the Pack screen should be clickable). The Recipe screen itself should use data loaded from the Recipe API and should be kept visually simple. At a minimum, include the following information on the Recipe screen:
 - Image
 - Title
 - Portion size toggle (refer to the `num_people` property)
 - Cooking time for currently selected portion size
 - Ingredient count for currently selected portion size
 
-> N.B. There is no authentication required for this API
+*Recipe API:*
+
+> N.B. Authentication is required for this API
+
+`GET https://cook.sorted.club/api/v1/recipe/{recipeId} Authorization: Bearer {JWT}`
 
 ## Notes
 * Use `yarn ios` or `yarn android` to run the Expo app and launch the simulator
-* The APIs are publicly accessible.
 * Don't forget to add comments to explain how any logically complex code works
 * Add an indication of how you might approach testing in the app
 * Write concise and clear commit messages
