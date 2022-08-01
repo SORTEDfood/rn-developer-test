@@ -25,7 +25,12 @@ To be successful in this task, you'll need to satisfy the following use cases:
 
 ### User session is persisted across app launches
 
-The app currently allows users to signup & login via Firebase, but sessions are not persisted across app launches. If I have previously logged into the app, I should not have to login again on app launch.
+The app currently allows users to login via Firebase, but sessions are not persisted across app launches. If I have previously logged into the app, I should not have to login again on app launch.
+
+Login with the following credentials:
+
+* Email: developer_test_1@sortedfood.com
+* Password: qwerty123
 
 > N.B. Do not worry about session duration or expiration
 
